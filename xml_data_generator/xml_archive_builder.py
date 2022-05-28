@@ -1,8 +1,8 @@
-import asyncio
 import os
 import random
 import uuid
 from zipfile import ZipFile
+from concurrent.futures import ProcessPoolExecutor as Pool
 
 
 class XMLBuilder:
@@ -37,7 +37,7 @@ class ArchiveBuilder:
         self._xml_num: int = os.getenv("XML_NUM", 100)
         self._uniq_set = set()
 
-    async def _generate_archive(self, zip_name):
+    def _generate_archive(self, zip_name):
         with ZipFile(zip_name, 'w') as myzip:
             for i in range(self._xml_num):
                 xml_build = XMLBuilder()
@@ -48,9 +48,10 @@ class ArchiveBuilder:
                 filename = 'xml{}.xml'.format(i)
                 myzip.writestr(filename, xml)
 
-    async def generate_archives(self):
+    def generate_archives(self):
         zip_name: str = os.getenv("ZIP_DIR", '/tmp/') + 'archive{}.zip'
-        return await asyncio.gather(*[self._generate_archive(zip_name.format(i)) for i in range(self._archives_num)])
+        with Pool() as pool:
+            pool.map(self._generate_archive, [zip_name.format(i) for i in range(self._archives_num)])
 
 
 def generate_random_string() -> str:  # Using uuid for now

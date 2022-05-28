@@ -21,7 +21,7 @@ class XMLParser:
 
     def process_archives(self):
         lst = self._archive_list
-        with Pool(self.outer_loop_proc) as pool:  # Какая гадость этот ваш multiprocessing
+        with Pool(self.outer_loop_proc) as pool:
             futures = pool.map(self._process_archive, lst)
             xml_id_list = []
             xml_object_list = []
